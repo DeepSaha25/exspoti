@@ -2,7 +2,7 @@ console.log('Lets write JavaScript');
 let currentSong = new Audio();
 let songs; // This will hold the list of songs for the *currently* loaded playlist
 let currFolder;
-let lastVolume = 1.0; // --- FIX: Added to remember volume before mute ---
+let lastVolume = 1.0;
 
 // This list is now UPDATED with all your playlists and their .mp3 files
 const folderSongs = {
@@ -16,7 +16,6 @@ const folderSongs = {
     "Señorita - Shawn Mendes": ["Señorita - Shawn Mendes.mp3"],
     "Main Rang Sharbaton ka": ["Main Rang Sharbaton ka.mp3"],
     "Teri Deewani": ["Teri Deewani.mp3"],
-    // --- NEW PLAYLISTS ADDED ---
     "Itna na mujhse tu pyar badha": ["Itna na mujhse tu pyar badha.mp3"],
     "Sahiba": ["Sahiba.mp3"],
     "Chikni Chameli": ["Chikni Chameli.mp3"],
@@ -54,15 +53,15 @@ async function getSongs(folder) {
     songUL.innerHTML = ""
     for (const song of songs) {
         // --- UPDATED HTML STRUCTURE ---
-        songUL.innerHTML = songUL.innerHTML + `<li>
-                            <img class="invert" width="24" src="img/music.svg" alt="">
+        songUL.innerHTML = songUL.innerHTML + `<li role="button" tabindex="0">
+                            <img class="invert" width="24" src="img/music.svg" alt="Music icon">
                             <div class="info">
                                 <div> ${song.replaceAll("%20", " ").replace(".mp3", "")}</div>
                                
                             </div>
                             <div class="playnow">
                                 <span>Play Now</span>
-                                <img width="24" class="invert" src="img/play.svg" alt="">
+                                <img width="24" class="invert" src="img/play.svg" alt="Play now">
                             </div> 
                         </li>`;
     }
@@ -73,7 +72,14 @@ async function getSongs(folder) {
             // Find the song name from the innerHTML and add .mp3 back
             let trackName = e.querySelector(".info").firstElementChild.innerHTML.trim() + ".mp3";
             playMusic(trackName)
-        })
+        });
+
+        // Add keyboard accessibility
+        e.addEventListener("keydown", (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                e.click(); // Trigger the click event
+            }
+        });
     })
 
     return songs;
@@ -89,7 +95,6 @@ const playMusic = (track, pause = false) => {
         return; 
     }
     
-    // Using relative path
     currentSong.src = `${currFolder}/` + track
     if (!pause) {
         currentSong.play()
@@ -97,8 +102,6 @@ const playMusic = (track, pause = false) => {
     }
     document.querySelector(".songinfo").innerHTML = decodeURI(track.replace(".mp3", ""))
     document.querySelector(".songtime").innerHTML = "00:00 / 00:00"
-
-
 }
 
 async function displayAlbums() {
@@ -114,7 +117,6 @@ async function displayAlbums() {
         "Señorita - Shawn Mendes", 
         "Main Rang Sharbaton ka", 
         "Teri Deewani",
-        // --- NEW FOLDERS ADDED ---
         "Itna na mujhse tu pyar badha",
         "Sahiba",
         "Chikni Chameli",
@@ -125,10 +127,9 @@ async function displayAlbums() {
     for (const folder of folders) { 
         // Get the metadata of the folder
         try {
-            // Using relative path
             let a = await fetch(`songs/${folder}/info.json`)
             let response = await a.json(); 
-            cardContainer.innerHTML = cardContainer.innerHTML + ` <div data-folder="${folder}" class="card">
+            cardContainer.innerHTML = cardContainer.innerHTML + ` <div data-folder="${folder}" class="card" role="button" tabindex="0">
                 <div class="play">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
@@ -137,7 +138,7 @@ async function displayAlbums() {
                     </svg>
                 </div>
 
-                <img src="songs/${folder}/cover.jpg" alt="">
+                <img src="songs/${folder}/cover.jpg" alt="${response.title} album cover" onerror="this.src='img/cover.jpg'">
                 <h2>${response.title}</h2>
                 <p>${response.description}</p>
             </div>`
@@ -151,34 +152,45 @@ async function displayAlbums() {
     Array.from(document.getElementsByClassName("card")).forEach(e => { 
         e.addEventListener("click", async item => {
             console.log("Fetching Songs")
-            // Pass the relative path to getSongs
             songs = await getSongs(`songs/${item.currentTarget.dataset.folder}`)  
             
-            // Add a check here: only play music if songs were found
             if (songs.length > 0) {
                 playMusic(songs[0])
             } else {
                 console.warn("No songs to play for this album.");
-                // Optionally clear the playbar
-                document.querySelector(".songinfo").innerHTML = "No songs found for this album"
+                document.querySelector(".songinfo").innerHTML = "No songs found"
                 document.querySelector(".songtime").innerHTML = "00:00 / 00:00"
                 play.src = "img/play.svg"
             }
+        });
 
-        })
+        // Add keyboard accessibility
+        e.addEventListener("keydown", async (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                console.log("Fetching Songs (Keydown)");
+                songs = await getSongs(`songs/${event.currentTarget.dataset.folder}`);
+                if (songs.length > 0) {
+                    playMusic(songs[0]);
+                } else {
+                    console.warn("No songs to play for this album.");
+                    document.querySelector(".songinfo").innerHTML = "No songs found";
+                    document.querySelector(".songtime").innerHTML = "00:00 / 00:00";
+                    play.src = "img/play.svg";
+                }
+            }
+        });
     })
 }
 
 async function main() {
     // Get the list of all the songs
-    // UPDATED to load your first playlist by default
     await getSongs("songs/Kiliye Kiliye")
-    // Play the first song (if it exists) but keep it paused
+    
     if (songs.length > 0) {
         playMusic(songs[0], true)
     } else {
         console.warn("No initial songs found in 'Kiliye Kiliye' folder.");
-        playMusic(undefined, true); // This will show the error state gracefully
+        playMusic(undefined, true); 
     }
 
     // Display all the albums on the page
@@ -187,9 +199,8 @@ async function main() {
 
     // Attach an event listener to play, next and previous
     play.addEventListener("click", () => {
-        if (!currentSong.src || currentSong.src.endsWith("/")) { // Check if src is empty or just the base path
+        if (!currentSong.src || currentSong.src.endsWith("/")) { 
             console.warn("No song loaded.");
-            // Optionally play the first song of the current list
             if (songs && songs.length > 0) {
                 playMusic(songs[0]);
             }
@@ -222,21 +233,20 @@ async function main() {
 
     // Add an event listener for hamburger
     document.querySelector(".hamburger").addEventListener("click", () => {
-        document.querySelector(".left").style.left = "0"
+        document.querySelector(".left").classList.add("open");
     })
 
     // Add an event listener for close button
     document.querySelector(".close").addEventListener("click", () => {
-        document.querySelector(".left").style.left = "-120%"
+        document.querySelector(".left").classList.remove("open");
     })
 
-    // --- FIX: PREVIOUS BUTTON LOGIC ---
+    // --- PREVIOUS BUTTON LOGIC ---
     previous.addEventListener("click", () => {
         if (!currentSong.src || !songs || songs.length === 0) return;
         currentSong.pause()
         console.log("Previous clicked")
 
-        // Decode the track name from the full URL source
         let currentTrack = decodeURI(currentSong.src.split("/").pop())
         let index = songs.indexOf(currentTrack)
 
@@ -247,44 +257,40 @@ async function main() {
         }
         
         if ((index - 1) < 0) {
-            // If at the beginning, loop to the end
             playMusic(songs[songs.length - 1]) 
         } else {
             playMusic(songs[index - 1])
         }
     })
 
-    // --- FIX: NEXT BUTTON LOGIC ---
+    // --- NEXT BUTTON LOGIC ---
     next.addEventListener("click", () => {
         if (!currentSong.src || !songs || songs.length === 0) return;
         currentSong.pause()
         console.log("Next clicked")
 
-        // Decode the track name from the full URL source
         let currentTrack = decodeURI(currentSong.src.split("/").pop())
         let index = songs.indexOf(currentTrack)
 
         if (index === -1) {
              console.warn("Could not find current song in list:", currentTrack);
-             playMusic(songs[0]); // Fallback to first song
+             playMusic(songs[0]);
              return;
         }
 
         if ((index + 1) >= songs.length) {
-            // If at the end, loop to the beginning
             playMusic(songs[0])
         } else {
             playMusic(songs[index + 1])
         }
     })
 
-    // --- FIX: VOLUME SLIDER (use 'input' for real-time update) ---
+    // --- VOLUME SLIDER ---
     document.querySelector(".range").getElementsByTagName("input")[0].addEventListener("input", (e) => {
         let newVolume = parseInt(e.target.value) / 100;
         console.log("Setting volume to", e.target.value, "/ 100") 
         currentSong.volume = newVolume;
         
-        // Also update the mute icon
         if (newVolume === 0) {
             document.querySelector(".volume>img").src = "img/mute.svg";
         } else {
@@ -292,24 +298,22 @@ async function main() {
         }
     })
 
-    // --- FIX: MUTE BUTTON (remembers last volume) ---
+    // --- MUTE BUTTON ---
     document.querySelector(".volume>img").addEventListener("click", e=>{ 
         if(currentSong.volume > 0){
             // MUTE
-            lastVolume = currentSong.volume; // Store the current volume
+            lastVolume = currentSong.volume;
             e.target.src = "img/mute.svg";
             currentSong.volume = 0;
             document.querySelector(".range").getElementsByTagName("input")[0].value = 0;
         }
         else{
             // UNMUTE
-            // Restore to the last volume (or 1.0 if lastVolume was 0)
             let restoreVolume = lastVolume > 0 ? lastVolume : 1.0;
             e.target.src = "img/volume.svg";
             currentSong.volume = restoreVolume;
             document.querySelector(".range").getElementsByTagName("input")[0].value = restoreVolume * 100;
         }
-
     })
 
 }

@@ -5,6 +5,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Satisfy&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -12,48 +13,50 @@
   font-family: 'Inter', sans-serif;
 }
 
+html,
 body {
   background: linear-gradient(180deg, #000 0%, #0b0b0b 40%, #121212 100%);
   color: white;
+  height: 100%;
+  overflow: hidden; /* Prevent body scroll */
 }
 
 /* --- Main Container --- */
 .container {
-  height: 100vh;
-  overflow: hidden; /* Prevent whole page scroll */
-  gap: 5px; /* Space between left/right divs */
+  height: calc(100vh - 90px); /* Full height minus the playbar */
+  overflow: hidden;
+  gap: 8px; /* Space between left/right divs */
+  padding: 8px;
 }
 
 /* --- SIDEBAR --- */
 .left {
-  width: 24vw;
-  /* MODIFIED: Removed padding, added height and flex */
-  padding: 0; 
-  height: 100vh;
+  width: 300px;
+  min-width: 300px; /* Fixed width for desktop */
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px; /* Space between home/library blocks */
 }
-.logo{
+
+.logo {
   display: flex;
-  gap:5px ;
+  align-items: center; /* Vertically align logo and text */
+  gap: 5px;
+  padding: 10px; /* Give logo section padding */
 }
 .logo img {
   width: 50px;
 }
-.logo p{
- position: relative;
- font-family: "Karla", sans-serif;
-    font-size: larger;
-    font-weight: bolder;
-}
 .logo p {
-    top: 20px;
-}
-.home {
-  padding: 10px; /* Added padding here */
+  font-family: "Karla", sans-serif;
+  font-size: 1.25rem; /* Use rem for scalable font */
+  font-weight: bolder;
 }
 
+.home {
+  padding: 10px;
+}
 .home ul li {
   display: flex;
   align-items: center;
@@ -74,8 +77,7 @@ body {
 
 /* LIBRARY */
 .library {
-  /* MODIFIED: Added flex properties */
-  padding: 10px; /* Added padding here */
+  padding: 10px;
   flex-grow: 1; /* Fill remaining vertical space */
   display: flex;
   flex-direction: column;
@@ -120,90 +122,88 @@ body {
 
 /* --- Song List in Library --- */
 .songList {
-  flex-grow: 1; 
+  flex-grow: 1;
   overflow-y: auto;
   margin-top: 15px;
+  padding-right: 5px; /* Prevent scrollbar from overlapping content */
 }
 
-/* --- UPDATED SONG LIST STYLES --- */
 .songList ul {
-    padding: 0; /* Removed default padding */
+  padding: 0;
 }
 .songList ul li {
-    list-style-type: none; /* Removed decimal numbers */
-    display: flex;
-    align-items: center; /* Vertically center items */
-    justify-content: space-between;
-    gap: 10px; /* Spacing between items */
-    cursor: pointer;
-    border: 1px solid #2a2a2a; /* Subtle border */
-    margin-bottom: 8px; /* Space between cards */
-    padding: 10px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  border: 1px solid #2a2a2a;
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 .songList ul li:hover {
-    background-color: #252525;
+  background-color: #252525;
 }
 
 .songList .info {
-    flex-grow: 1; /* Take available space */
-    margin: 0 10px; /* Space from icon */
-    font-size: 13px;
-    width: auto; /* Removed fixed width */
+  flex-grow: 1;
+  margin: 0 10px;
+  font-size: 13px;
+  /* Ensure text doesn't overflow */
+  min-width: 0; 
 }
 .songList .info div:first-child {
-    color: white;
-    font-weight: 500;
-    font-size: 14px;
-    margin-bottom: 4px;
-    word-break: break-all;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 4px;
+  /* Truncate long song names */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .songList .info div:last-child {
-    color: #b3b3b3;
-    font-size: 12px;
+  color: #b3b3b3;
+  font-size: 12px;
 }
 
 .playnow {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px; /* Space between text and icon */
-    padding-right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding-right: 10px;
+  /* Prevent this section from shrinking */
+  flex-shrink: 0; 
 }
 .playnow span {
-    font-size: 14px; /* Adjusted font size */
-    color: #b3b3b3;
-    font-weight: 500;
-    /* Removed fixed width and padding */
+  font-size: 14px;
+  color: #b3b3b3;
+  font-weight: 500;
+}
+.playnow img {
+  width: 24px;
 }
 .songList ul li:hover .playnow span {
-    color: white;
+  color: white;
 }
-/* --- END OF UPDATED STYLES --- */
-
 
 /* --- MAIN SECTION --- */
 .right {
-  width: 76vw;
+  flex-grow: 1; /* Take remaining space */
   background: #181818;
   border-radius: 10px;
-  overflow: hidden;
-  margin-left: 0; 
+  overflow: hidden; /* Hide internal overflow */
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
+  min-width: 0; /* Prevent flex overflow */
 }
 
-/* --- NEW: Main Content Scroll Wrapper --- */
-.main-content {
-  flex-grow: 1; /* Take remaining space */
-  overflow-y: auto; /* Make this area scrollable */
-  padding-bottom: 100px; /* Space for the fixed playbar */
-}
-
-
-/* HEADER */
+/* Header */
 .header {
   display: flex;
   align-items: center;
@@ -212,44 +212,29 @@ body {
   border-bottom: 1px solid #2a2a2a;
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 5; /* Keep it above content */
 }
-
-/* NEW: Style for .nav */
 .nav {
   display: flex;
   align-items: center;
   gap: 15px;
 }
-
-
-/* GREETING SECTION - MODIFIED */
-.welcome {
-  /* Removed padding */
-}
 .welcome h2 {
-  font-size:29px; /* Made it a bit smaller for the header */
-  margin-bottom: 0;
-  
+  font-size: 24px; /* Scaled down for responsiveness */
   font-weight: 900;
 }
-/* ADDED: Style for the new <p> tag */
-.welcome p {
-  color: #b3b3b3;
-  font-size: 14px;
-  margin-top: 5px;
-}
 
-/* PLAYLIST CARDS */
-.spotifyPlaylists {
+/* --- Main Content --- */
+.main-content {
+  flex-grow: 1; /* Take remaining space */
+  overflow-y: auto; /* Make this area scrollable */
   padding: 20px;
 }
+
 .spotifyPlaylists h1 {
-  
-    font-size: 20px;
-    font-weight: 500;
-     margin-bottom: 15px;
-  
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 15px;
 }
 
 .cardContainer {
@@ -263,6 +248,8 @@ body {
   padding: 12px;
   border-radius: 8px;
   transition: all 0.3s ease;
+  flex-grow: 1; /* Allow cards to grow */
+  max-width: 300px; /* But not too large */
 }
 .card:hover {
   background: #2a2a2a;
@@ -271,35 +258,50 @@ body {
 .card img {
   width: 100%;
   border-radius: 6px;
+  /* Added for image loading */
+  background-color: #333;
+  aspect-ratio: 1 / 1; /* Keep cards square */
+  object-fit: cover;
 }
 .card h2 {
   font-size: 15px;
   margin-top: 8px;
+  /* Truncate long titles */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .card p {
   font-size: 13px;
   color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* --- PLAYBAR --- */
 .playbar {
   position: fixed;
-  bottom: 25px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 72vw;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 90px;
   background: #181818;
-  border-radius: 12px;
-  padding: 10px 16px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-  z-index: 10; /* Make sure it's on top */
+  border-top: 1px solid #2a2a2a;
+  z-index: 10;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .seekbar {
+  position: absolute;
+  top: 0; /* Anchor to the top of the playbar */
+  left: 0;
+  right: 0;
   height: 3px;
   background: #555;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  cursor: pointer; /* Added cursor */
+  cursor: pointer;
 }
 .circle {
   width: 10px;
@@ -307,8 +309,9 @@ body {
   border-radius: 50%;
   background: #1ed760;
   position: relative;
-  bottom: 4px;
-  transition: left 0.1s linear; /* Added transition */
+  bottom: 3.5px; /* Center on the seekbar */
+  left: 0%; /* JS will control this */
+  transition: left 0.1s linear;
 }
 
 /* Play Controls */
@@ -316,10 +319,22 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+}
+.songbuttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex: 0 1 150px; /* Don't grow, base width 150px */
 }
 .songbuttons img {
   cursor: pointer;
   transition: 0.2s;
+  width: 28px; /* Set explicit size */
+}
+.songbuttons img#play {
+  width: 35px; /* Larger play button */
 }
 .songbuttons img:hover {
   transform: scale(1.1);
@@ -327,72 +342,173 @@ body {
 .songinfo {
   font-size: 14px;
   color: #fff;
-  width: 250px; /* Give it some space */
-  word-break: break-all;
+  flex: 1 1 30%; /* Grow and shrink */
+  min-width: 0; /* Prevent overflow */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .songtime {
   font-size: 12px;
   color: #b3b3b3;
+  flex-shrink: 0; /* Don't shrink */
 }
 .timevol {
-  display: flex; /* Added */
-  align-items: center; /* Added */
-  gap: 15px; /* Added */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+  flex: 1 1 30%;
 }
 .volume {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+.volume img {
+  width: 20px;
+  cursor: pointer;
+}
 .range input {
+  cursor: pointer;
+  accent-color: #1ed760; /* Style the slider */
+}
+
+/* --- RESPONSIVE --- */
+
+/* Hamburger/Close buttons */
+.hamburger,
+.hamburgerContainer {
+  display: none; /* Hidden on desktop */
+}
+.close {
+  display: none; /* Hidden on desktop */
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: 30px;
   cursor: pointer;
 }
 
-/* RESPONSIVE */
-@media (max-width: 1200px) {
+/* Tablet */
+@media (max-width: 1024px) {
   .left {
-    position: absolute;
-    left: -120%;
-    background: #000;
-    width: 320px;
-    height: 100vh;
-    z-index: 10;
-    transition: 0.3s ease;
+    width: 250px; /* Narrower sidebar */
+    min-width: 250px;
   }
-  
-  /* ADDED: Hamburger display */
-  .hamburger {
-    display: block; /* Show hamburger on smaller screens */
+  .cardContainer {
+    justify-content: center; /* Center cards */
+  }
+  .card {
+    width: 200px;
+    max-width: 200px;
+  }
+  .songinfo,
+  .timevol {
+    flex-basis: 25%;
+  }
+  .welcome h2 {
+    font-size: 20px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .container {
+    height: calc(100vh - 120px); /* Taller playbar */
+    padding: 0;
+    gap: 0;
+  }
+
+  /* Left sidebar becomes an overlay */
+  .left {
+    position: fixed;
+    left: -110%; /* Start off-screen */
+    top: 0;
+    width: 80%;
+    max-width: 350px;
+    height: 100vh;
+    z-index: 20;
+    background: #000;
+    transition: left 0.3s ease-in-out;
+    border-right: 1px solid #2a2a2a;
+    padding-top: 50px; /* Space for close button */
+  }
+  /* Class added by JS to show sidebar */
+  .left.open {
+    left: 0;
+  }
+
+  .close {
+    display: block; /* Show close button */
   }
   .hamburgerContainer {
-    display: block; /* Make sure it's visible */
+    display: flex; /* Show hamburger button */
   }
-  .close {
-    display: block; /* Show close button inside sidebar */
-    position: absolute;
-    right: 20px;
-    top: 20px;
-  }
-  .right {
-    width: 100vw; /* Right side takes full width */
-  }
-  .playbar {
-    width: 90vw; /* Make playbar wider */
-  }
-}
 
-/* Added hamburger display block */
-.hamburger{
-    display: none;
-}
-.hamburgerContainer{
+  .right {
+    width: 100%;
+    border-radius: 0;
+  }
+  .main-content {
+    padding: 15px;
+  }
+
+  .cardContainer {
+    justify-content: center;
+  }
+  .card {
+    width: 100%; /* Make cards full-width */
+    max-width: 350px;
+  }
+
+  /* Mobile Playbar */
+  .playbar {
+    height: 120px;
+    padding: 10px;
+    /* Center content vertically */
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 14px;
-}
-
-/* Added close button display none for desktop */
-.close{
-    display: none;
+  }
+  .seekbar {
+    position: relative; /* Make it part of the flow */
+    width: 90%;
+    margin-bottom: 8px;
+  }
+  .abovebar {
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+    width: 100%;
+  }
+  .songinfo {
+    order: -1; /* Move song info to top */
+    width: 100%;
+    font-size: 13px;
+    padding: 0 10px;
+  }
+  .songbuttons {
+    width: 100%;
+    gap: 20px;
+  }
+  .timevol {
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+  }
+  .songtime {
+    display: none; /* Hide time, too cramped */
+  }
+  .volume {
+    width: 80%;
+    max-width: 250px;
+  }
+  .range {
+    flex-grow: 1;
+  }
+  .range input {
+    width: 100%;
+  }
 }
