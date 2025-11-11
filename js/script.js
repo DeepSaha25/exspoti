@@ -25,6 +25,7 @@ function setDynamicGreeting() {
         greetingElement.textContent = greetingText;
     }
 }
+
 const folderSongs = {
     "Kiliye Kiliye": ["Kiliye Kiliye.mp3"],
     "O mere Dil ke": ["O mere dil ke chain.mp3"],
@@ -86,7 +87,6 @@ async function getSongs(folder) {
     }
 
     Array.from(document.querySelectorAll(".songList li")).forEach(e => {
-        // Check if it's the "No liked songs" message
         if (e.style.cursor === 'default') return; 
         
         e.addEventListener("click", () => {
@@ -109,17 +109,15 @@ const playMusic = (track, pause = false) => {
     }
 
     function highlightCurrentSong(trackName) {
-    const songListLi = document.querySelectorAll(".songList li");
-    songListLi.forEach(li => {
-        li.classList.remove('active-song');
-    });
-    Array.from(songListLi).forEach(li => {
-        const liTrackName = li.querySelector(".info").firstElementChild.innerHTML.trim();
-        if (decodeURI(trackName).includes(liTrackName)) {
-            li.classList.add('active-song');
-        }
-    });
-}
+        const songListLi = document.querySelectorAll(".songList li");
+        songListLi.forEach(li => li.classList.remove('active-song'));
+        Array.from(songListLi).forEach(li => {
+            const liTrackName = li.querySelector(".info").firstElementChild.innerHTML.trim();
+            if (decodeURI(trackName).includes(liTrackName)) {
+                li.classList.add('active-song');
+            }
+        });
+    }
     
     // --- MODIFIED: To find the full path for liked songs ---
     if (currFolder === 'Liked Songs') {
@@ -134,8 +132,6 @@ const playMusic = (track, pause = false) => {
         currentSong.src = `${currFolder}/${track}`;
         highlightCurrentSong(track);
     }
-
-    // ------------------------------------------------------
 
     if (!pause) {
         currentSong.play();
@@ -153,27 +149,19 @@ function toggleLikeAlbum(likeButton) {
     const heartPath = likeButton.querySelector('svg path');
 
     if (isLiked) {
-        // --- Album is LIKED ---
         heartPath.setAttribute('d', heartFilledPath);
         for (const song of songsInAlbum) {
             const fullPath = `songs/${folderName}/${song}`;
-            if (!likedSongs.includes(fullPath)) {
-                likedSongs.push(fullPath);
-            }
+            if (!likedSongs.includes(fullPath)) likedSongs.push(fullPath);
         }
     } else {
-        // --- Album is UNLIKED ---
         heartPath.setAttribute('d', heartOutlinePath);
         for (const song of songsInAlbum) {
             const fullPath = `songs/${folderName}/${song}`;
             likedSongs = likedSongs.filter(s => s !== fullPath);
         }
     }
-    
-    // Optional: Refresh the liked songs list if it's currently open
-    if (currFolder === 'Liked Songs') {
-        getSongs('Liked Songs');
-    }
+    if (currFolder === 'Liked Songs') getSongs('Liked Songs');
 }
 
 async function displayAlbums() {
@@ -196,8 +184,6 @@ async function displayAlbums() {
         try {
             let a = await fetch(`songs/${folder}/info.json`);
             let response = await a.json(); 
-            
-            // --- MODIFIED: Added the heart button HTML ---
             cardContainer.innerHTML += `
             <div data-folder="${folder}" class="card" role="button" tabindex="0">
                 <div class="play">
@@ -207,25 +193,20 @@ async function displayAlbums() {
                             stroke-linejoin="round" />
                     </svg>
                 </div>
-
                 <div class="like-btn" data-folder="${folder}" role="button" aria-label="Like album">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="${heartOutlinePath}"></path>
                     </svg>
                 </div>
-                <img src="songs/${folder}/cover.jpg" alt="${response.title} album cover" onerror="this.src='img/cover.jpg'">
+                <img src="songs/${folder}/cover.jpg" alt="${response.title}" onerror="this.src='img/cover.jpg'">
                 <h2>${response.title}</h2>
                 <p>${response.description}</p>
             </div>`;
-            // --------------------------------------------
         } catch (error) {
             console.error(`Could not load info.json for folder: ${folder}`, error);
         }
     }
 
-    // --- MODIFIED: Split card click and like click listeners ---
-    
-    // Card click listener (to play album)
     Array.from(document.getElementsByClassName("card")).forEach(e => { 
         e.addEventListener("click", async item => {
             songs = await getSongs(`songs/${item.currentTarget.dataset.folder}`);  
@@ -249,10 +230,9 @@ async function displayAlbums() {
         });
     });
 
-    // --- NEW: Like button click listener ---
     Array.from(document.getElementsByClassName("like-btn")).forEach(e => {
         e.addEventListener("click", (event) => {
-            event.stopPropagation(); // VERY IMPORTANT: Prevents the card click from firing
+            event.stopPropagation();
             toggleLikeAlbum(event.currentTarget);
         });
     });
@@ -265,13 +245,10 @@ async function main() {
     else playMusic(undefined, true);
     await displayAlbums();
 
-    // --- NEW: Add click listener for the Liked Songs card in sidebar ---
     document.getElementById("likedSongsCard").addEventListener("click", () => {
         getSongs("Liked Songs");
-        // Optional: Close mobile sidebar if open
         document.querySelector(".left").classList.remove("open");
     });
-    // -----------------------------------------------------------------
 
     play.addEventListener("click", () => {
         if (!currentSong.src || currentSong.src.endsWith("/")) {
@@ -288,8 +265,53 @@ async function main() {
     });
 
     currentSong.addEventListener("timeupdate", () => {
-        document.querySelector(".songtime").innerHTML = `${secondsToMinutesSeconds(currentSong.currentTime)} / ${secondsToMinutesSeconds(currentSong.duration)}`;
-        document.querySelector(".circle").style.left = (currentSong.currentTime / currentSong.duration) * 100 + "%";
+        document.querySelector(".songtime").innerHTML = 
+            `${secondsToMinutesSeconds(currentSong.currentTime)} / ${secondsToMinutesSeconds(currentSong.duration)}`;
+        document.querySelector(".circle").style.left = 
+            (currentSong.currentTime / currentSong.duration) * 100 + "%";
+    });
+
+    // --- NEW FEATURE: Auto-play next song or next album ---
+    currentSong.addEventListener("ended", async () => {
+        if (!songs || songs.length === 0) return;
+
+        let currentTrackName = decodeURI(currentSong.src.split("/").pop());
+        let index = songs.indexOf(currentTrackName);
+
+        if (index !== -1 && index + 1 < songs.length) {
+            playMusic(songs[index + 1]);
+            return;
+        }
+
+        const folderOrder = [
+            "Kiliye Kiliye", 
+            "O mere Dil ke", 
+            "Lag ja Gale", 
+            "karan aujla", 
+            "Señorita - Shawn Mendes", 
+            "Main Rang Sharbaton ka", 
+            "Teri Deewani",
+            "Itna na mujhse tu pyar badha",
+            "Sahiba",
+            "Chikni Chameli",
+            "Jalebi Bai"
+        ];
+
+        const currentAlbum = currFolder?.split("/").pop();
+        const currentAlbumIndex = folderOrder.indexOf(currentAlbum);
+
+        if (currentAlbumIndex !== -1 && currentAlbumIndex + 1 < folderOrder.length) {
+            const nextAlbum = folderOrder[currentAlbumIndex + 1];
+            songs = await getSongs(`songs/${nextAlbum}`);
+            if (songs.length > 0) playMusic(songs[0]);
+            else {
+                document.querySelector(".songinfo").innerHTML = "No songs found in next album";
+                play.src = "img/play.svg";
+            }
+        } else {
+            document.querySelector(".songinfo").innerHTML = "End of all albums 🎵";
+            play.src = "img/play.svg";
+        }
     });
 
     document.querySelector(".seekbar").addEventListener("click", e => {
@@ -303,7 +325,6 @@ async function main() {
     document.querySelector(".hamburger").addEventListener("click", () => {
         document.querySelector(".left").classList.add("open");
     });
-
     document.querySelector(".close").addEventListener("click", () => {
         document.querySelector(".left").classList.remove("open");
     });
@@ -311,34 +332,20 @@ async function main() {
     previous.addEventListener("click", () => {
         if (!currentSong.src || !songs || songs.length === 0) return;
         currentSong.pause();
-        
-        // --- MODIFIED: To work with liked songs list ---
         let currentTrackName = decodeURI(currentSong.src.split("/").pop());
         let index = songs.indexOf(currentTrackName);
-        // ----------------------------------------------
-
-        if (index === -1) {
-            playMusic(songs[0]);
-            return;
-        }
-        if (index - 1 < 0) playMusic(songs[songs.length - 1]);
+        if (index === -1) playMusic(songs[0]);
+        else if (index - 1 < 0) playMusic(songs[songs.length - 1]);
         else playMusic(songs[index - 1]);
     });
 
     next.addEventListener("click", () => {
         if (!currentSong.src || !songs || songs.length === 0) return;
         currentSong.pause();
-        
-        // --- MODIFIED: To work with liked songs list ---
         let currentTrackName = decodeURI(currentSong.src.split("/").pop());
         let index = songs.indexOf(currentTrackName);
-        // ----------------------------------------------
-
-        if (index === -1) {
-            playMusic(songs[0]);
-            return;
-        }
-        if (index + 1 >= songs.length) playMusic(songs[0]);
+        if (index === -1) playMusic(songs[0]);
+        else if (index + 1 >= songs.length) playMusic(songs[0]);
         else playMusic(songs[index + 1]);
     });
 
@@ -362,27 +369,16 @@ async function main() {
         }
     });
 
-    
-    // --- NEW: Add search functionality ---
     document.getElementById('searchInput').addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase();
         const cards = document.querySelectorAll('.cardContainer .card');
-
         cards.forEach(card => {
             const title = card.querySelector('h2').textContent.toLowerCase();
             const description = card.querySelector('p').textContent.toLowerCase();
-            
-            // Check if title or description includes the search term
             const isVisible = title.includes(searchTerm) || description.includes(searchTerm);
-            
-            if (isVisible) {
-                card.style.display = ''; // Show the card (resets to default display)
-            } else {
-                card.style.display = 'none'; // Hide the card
-            }
+            card.style.display = isVisible ? '' : 'none';
         });
     });
-    // --- END: Search functionality ---
 }
 
 main();
