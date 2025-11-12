@@ -26,6 +26,7 @@ function setDynamicGreeting() {
     }
 }
 
+// --- MODIFIED: Added new songs and albums ---
 const folderSongs = {
     "Kiliye Kiliye": ["Kiliye Kiliye.mp3"],
     "O mere Dil ke": ["O mere dil ke chain.mp3"],
@@ -36,7 +37,8 @@ const folderSongs = {
         "Mexico (Original) - Karan Aujla.mp3",
         "Tell Me - Karan Aujla.mp3",
         "Wavy Karan Aujla.mp3",
-        "Winning Speech - Karan Aujla.mp3"
+        "Winning Speech - Karan Aujla.mp3",
+        "Boyfriend Karan Aujla.mp3" // <-- New song added
     ],
     "Señorita - Shawn Mendes": ["Señorita - Shawn Mendes.mp3"],
     "Main Rang Sharbaton ka": ["Main Rang Sharbaton ka.mp3"],
@@ -44,8 +46,19 @@ const folderSongs = {
     "Itna na mujhse tu pyar badha": ["Itna na mujhse tu pyar badha.mp3"],
     "Sahiba": ["Sahiba.mp3"],
     "Chikni Chameli": ["Chikni Chameli.mp3"],
-    "Jalebi Bai": ["Jalebi Bai.mp3"]
+    "Jalebi Bai": ["Jalebi Bai.mp3"],
+    // --- New Albums Added ---
+    "JENNIE Hits": [
+        "JENNIE - Mantra.mp3", 
+        "JENNIE & Dominic Fike.mp3", 
+        "JENNIE - like.mp3"
+    ],
+    "Doja Cat - Woman": ["Doja Cat - Woman.mp3"],
+    "Naina": ["Naina.mp3"],
+    "Coldplay X BTS - My Universe": ["Coldplay X BTS - My Universe.mp3"],
+    "Even When_The Best Part": ["Olivia Rodrigo, Joshua Bassett - Even When_The Best Part.mp3"]
 };
+// ------------------------------------------
 
 function secondsToMinutesSeconds(seconds) {
     if (isNaN(seconds) || seconds < 0) return "00:00";
@@ -166,6 +179,8 @@ function toggleLikeAlbum(likeButton) {
 
 async function displayAlbums() {
     let cardContainer = document.querySelector(".cardContainer");
+    
+    // --- MODIFIED: Added new folders ---
     let folders = [
         "Kiliye Kiliye", 
         "O mere Dil ke", 
@@ -177,8 +192,14 @@ async function displayAlbums() {
         "Itna na mujhse tu pyar badha",
         "Sahiba",
         "Chikni Chameli",
-        "Jalebi Bai"
+        "Jalebi Bai",
+        "JENNIE Hits",
+        "Doja Cat - Woman",
+        "Naina",
+        "Coldplay X BTS - My Universe",
+        "Even When_The Best Part"
     ];
+    // ----------------------------------
 
     for (const folder of folders) { 
         try {
@@ -283,6 +304,7 @@ async function main() {
             return;
         }
 
+        // --- MODIFIED: Added new folders to auto-play order ---
         const folderOrder = [
             "Kiliye Kiliye", 
             "O mere Dil ke", 
@@ -294,8 +316,14 @@ async function main() {
             "Itna na mujhse tu pyar badha",
             "Sahiba",
             "Chikni Chameli",
-            "Jalebi Bai"
+            "Jalebi Bai",
+            "JENNIE Hits",
+            "Doja Cat - Woman",
+            "Naina",
+            "Coldplay X BTS - My Universe",
+            "Even When_The Best Part"
         ];
+        // -----------------------------------------------------
 
         const currentAlbum = currFolder?.split("/").pop();
         const currentAlbumIndex = folderOrder.indexOf(currentAlbum);
@@ -369,6 +397,7 @@ async function main() {
         }
     });
 
+    // This search will only work if you add an <input> element with id="searchInput" to your HTML file.
     document.getElementById('searchInput').addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase();
         const cards = document.querySelectorAll('.cardContainer .card');
